@@ -36,9 +36,9 @@ Il faudra utiliser Symfony pour PHP. Ne vous inquiétez pas .. ça va vous simpl
 
 Enfin, on utilisera Firebase/Firestore au lieu de MySQL
 
-Remarque : s'il y a quelque chose à apporter comme modification faites le moi savoir !! :)
+Remarque : s'il y a quelque chose à apporter comme modification faites moi savoir à Alixe !! :)
 
 
 Que la force soit avec vous !
 
-Alixe
+Alixe et Olivier C.
