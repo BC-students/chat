@@ -2,9 +2,7 @@
 
 ### EN BREF POUR CE PROJET --> OBLIGATION DE :
 
-  - Fractionner avec Sass pour le Css : [doc](https://sass-lang.com/).
-
-  - Utiliser MVC et SYMFONY pour le back: [doc](http://knpbundles.com/).
+  - Utiliser VueJs pour le front: [doc](https://vuejs.org/).
     
   - Utiliser firestore pour la DataBase: [doc](https://firebase.google.com/docs/firestore/).
     
