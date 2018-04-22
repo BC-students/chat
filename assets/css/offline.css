@@ -1,0 +1,42 @@
+#main
+{
+	max-width: 1900px;
+}
+.home
+{
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	min-height: 100vh;
+	width: 100%;
+	background-color: rgb(97, 38, 51);
+	background-image: url(../img/bg_filtre1.png);
+	box-shadow: inset 0px -4px 4px 0px rgba(0, 0, 20, .3);
+}
+.home::after
+{
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	content:"";
+	pointer-events: none;
+	background-image: url(../img/bg_filtre2.png);
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+}
+h1, h2
+{
+	width: 100%;
+	text-align: center;
+	font-size: 2rem;
+	color: #bfa8ad;
+	letter-spacing: .2rem;
+}
+p
+{
+	font-size: 2rem;
+	color: #bfa8ad;
+}
