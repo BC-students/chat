@@ -1,15 +1,32 @@
 @import "variables";
 html
 {
+	width: 100vw;
+	height: 100%;
+	background-color: $backgroundHtml;
 }
 body
 {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: center;
+	width: 100%;
+	min-height: 100vh;
+    font-family: 'Roboto', sans-serif;
+
 }
 h1
 {
- }
+	font-size: 1.5rem;
+	font-weight: 500;
+	color: $veryLightBlue;
+}
 h2
 {
+	font-size: 1.5rem;
+	font-weight: 300;
+	color: $veryLightBlue;
 }
 p
 {
