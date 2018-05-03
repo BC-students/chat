@@ -36,7 +36,8 @@ data () {
 		listeMessagesLongueur: 0,
 		limitMessage : 20,
 		user: '',
-		messageEnvoyer: ''
+		messageEnvoyer: '',
+		listeMembres: []
 		
 		
 	}
@@ -56,8 +57,27 @@ methods: {
         this.listeMessagesLongueur = this.listeMessages.length
         // window.scroll(0,10000)
         
+        //======== vu =============
+
+        //recup vu
+        db.collection('sections').doc(this.sectionActive).get().then(doc => {
+   			if (doc.exists) {	
+   					this.listeMembres = {}
+   					this.listeMembres = doc.data().vu
+   					//modif vu
+				        this.listeMembres[firebase.auth().currentUser.uid] = true
+				        db.collection('sections').doc(this.sectionActive).update({
+							vu: this.listeMembres
+						})	
+    	}
+		})
+
+        
+
+
         
     });
+    
 },
 ancienMessageAfficher(){
 	this.limitMessage += 10
@@ -84,7 +104,76 @@ envois () {
 		    console.error("Error adding document: ", error);
 		});
 	this.messageEnvoyer = ''
-}
+	//notification
+		this.recuperationMembres()
+		db.collection('sections').doc(this.sectionActive).update({
+			vu: this.listeMembres
+		})
+		
+
+
+
+
+},
+
+	recuperationMembres() {
+		this.listeMembres = {}
+		var docRef = db.collection("sections").doc(this.sectionActive);
+
+			docRef.get().then(doc => {
+
+			    if (doc.exists) {
+			        
+			    	
+			        if(doc.data().membres != undefined){
+			        	this.listeMembres = {}
+			        	this.listeMembres = doc.data().membres
+			        }
+
+			        else {
+			        	db.collection("users").get()
+						    .then(querySnapshot => {
+						    	var membresGlobal ={}
+						        querySnapshot.forEach(doc => {
+						            membresGlobal[doc.id] = true
+						        });
+						        db.collection("sections").doc(this.sectionActive).update({membres: membresGlobal})
+						        this.listeMembres = membresGlobal
+						        console.log("ajout membres",this.listeMembres);
+
+						    })
+						    .catch(function(error) {
+						        console.log("Error getting documents: ", error);
+						    });
+
+			        	
+			        }
+
+
+			       
+
+			        // for(var membre in this.listeMembres){
+			        // 	this.listeMembres[membre] = false;
+
+			        // }
+
+
+
+			       
+
+
+
+
+
+			    } else {
+			        // doc.data() will be undefined in this case
+			        console.log("No such document!", this.sectionActive);
+
+			    }
+			}).catch(error => {
+			    console.log("Error getting document:", error);
+			});
+	}
 
 },
 
@@ -97,6 +186,7 @@ created (){
 watch: {
   sectionActive: function() {
           this.afficherMessage ()
+
 
         }
   	

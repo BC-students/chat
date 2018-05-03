@@ -23,8 +23,8 @@
     <!-- fin pop up -->
 
     <ul class="listeChatCSS">
-      <li class="listeSectionsCSS" v-for="section in listeSections" @click="sectionProps=section[0]; messagePerso(section[0])">
-        {{section[1]}}  
+      <li :class="{newCSS:section[2]}" class="listeSectionsCSS" v-for="section in listeSections" @click="sectionProps=section[0]; messagePerso(section[0])">
+        {{section[1]}} <span v-if="section[2]">new</span>  
         <button v-if="typeSection == 'prive'" @click="showModal2 = true; showModal2Value = section[0]">+</button> 
         <button v-if="typeSectionProps == 'prive'" @click="supprimerSection(section[0])">X</button>
       </li>
@@ -54,7 +54,7 @@ export default {
     
    
   },
-  props: ['typeSectionProps'],
+  props: ['typeSectionProps','notificationVu'],
 
  
 
@@ -86,6 +86,7 @@ export default {
 methods: {
 
   afficherSections () {
+      console.log("sec aff not",this.notificationVu)
       //privé
       if(this.typeSectionProps == 'prive'){
         var idUser = firebase.auth().currentUser.uid
@@ -94,21 +95,62 @@ methods: {
         this.listeSections = []
         querySnapshot.forEach(doc => {
 
-           var infoMsg = [doc.id,doc.data().nom]
-          this.listeSections.push(infoMsg)
-        })
+            //check notif
+            var infoMsg
 
+            if(this.notificationVu[0] != undefined){
+            for (var i = this.notificationVu.length - 1; i >= 0; i--) {
+              if(this.notificationVu[i][0] == doc.id){
+                infoMsg = [doc.id,doc.data().nom,true]
+                break
+              }
+              else{
+                infoMsg = [doc.id,doc.data().nom,false]
+              }
+            }
+          }
+          else{
+            infoMsg = [doc.id,doc.data().nom,false]
+          }
+
+          this.listeSections.push(infoMsg)
+
+        })
   })
 
       }
-      //prive
+      //perso
       else if (this.typeSectionProps == 'perso') {
          db.collection('users').onSnapshot(querySnapshot => {
         this.listeSections = []
+        var idUser = firebase.auth().currentUser.uid
         querySnapshot.forEach(doc => {
-          if(doc.data().nom == firebase.auth().currentUser.displayName){} 
-           else {var infoMsg = [doc.id,doc.data().nom]
-          this.listeSections.push(infoMsg)}
+
+
+
+
+          if(doc.id == idUser){} 
+           else {
+            var infoMsg
+            var check = false
+            db.collection('sections').where('type', '==', 'perso').where('membres.'+ doc.id ,'==', true).where('membres.'+ idUser ,'==', true).get().then(querySnapshot => {
+              console.log(querySnapshot);
+              querySnapshot.forEach(doc2 => {
+                if(doc2.data().vu[idUser] != true){
+                  infoMsg = [doc.id,doc.data().nom, true]
+                  check = true
+                }
+                else{
+                  infoMsg = [doc.id,doc.data().nom, false]
+                  check = true
+                }
+              
+            });
+              if(check == false){infoMsg = [doc.id,doc.data().nom, false]}
+              this.listeSections.push(infoMsg)
+          })
+
+          }
         })
 
       })
@@ -120,13 +162,32 @@ methods: {
       db.collection('sections').where('type', '==', this.typeSectionProps).onSnapshot(querySnapshot => {
         this.listeSections = []
         querySnapshot.forEach(doc => {
+           var infoMsg
+           
 
-           var infoMsg = [doc.id,doc.data().nom]
+            if(this.notificationVu[0] != undefined){
+            for (var i = this.notificationVu.length - 1; i >= 0; i--) {
+
+              if(this.notificationVu[i][0] == doc.id){
+                infoMsg = [doc.id,doc.data().nom,true]
+                break
+              }
+              else{
+                infoMsg = [doc.id,doc.data().nom,false]
+              }
+            }
+          }
+          else{
+            infoMsg = [doc.id,doc.data().nom,false]
+          }
+
           this.listeSections.push(infoMsg)
         })
 
   })
+
     }
+    
 },
 
   newSection () {
@@ -143,16 +204,6 @@ methods: {
       })
       .then(function(docRef) {
           console.log("Document written with ID: ", docRef.id);
-          //ajout membre
-          // db.collection('sections/' + docRef.id + '/membres').add({
-          //   dateAjout: new Date,
-          //   })
-            // .then(function(docRef) {
-            //     console.log("Document written with ID: ", docRef.id);
-            // })
-            // .catch(function(error) {
-            //     console.error("Error adding document: ", error);
-            // });
 
       })
       .catch(function(error) {
@@ -193,6 +244,7 @@ methods: {
   },
 
   ajouterMembre() {
+
     var sectionProps = this.sectionProps;
     var membresSection
 
@@ -222,7 +274,7 @@ methods: {
           console.log("Error getting document:", error);
       });
 
-
+      this.nomMembre = ''
 
 
 
@@ -244,69 +296,56 @@ methods: {
 
   messagePerso (id) {
     if(this.typeSectionProps == 'perso'){
-    var currentUserId = firebase.auth().currentUser.uid
-
-    var idDoc = id + currentUserId
-    var idDoc2 = currentUserId + id 
-
-    var docRef = db.collection("sections");
-
-      db.collection("sections").doc(idDoc).get().then(doc => {
-          if (doc.exists) {
-              console.log("Document data:", doc.data());
-              this.sectionProps = idDoc
-          } else {
-              // doc.data() will be undefined in this case
-              console.log("No such document!");
-
-                   db.collection("sections").doc(idDoc2).get().then(doc => {
-                      if (doc.exists) {
-                      console.log("Document data:", doc.data());
-                      this.sectionProps = idDoc2
-                     } else {
-                        
-                    console.log("No such document!");
-
-                     db.collection("sections").doc(idDoc).set({
-                        type: "perso",
-                    })
-                    .then(docRef => {
-                        console.log("Document written with ID: ", docRef.id);
-                        this.sectionProps = idDoc
-                    })
-                    .catch(error => {
-                        console.error("Error adding document: ", error);
+        var idUser = firebase.auth().currentUser.uid
+          //check si le chat est existe
+        var creation = false
+              db.collection("sections").where("membres." + id, "==", true).where("membres." + idUser, "==", true).where("type", "==" , "perso")
+                .get()
+                .then(querySnapshot => {
+                    querySnapshot.forEach(doc => {
+                        // doc.data() is never undefined for query doc snapshots
+                        console.log(doc.id, " => ", doc.data());
+                        creation = true
+                        this.sectionProps = doc.id
                     });
+                      //creation
+                        if(creation == false){
+                            var membres = {}
+                            membres[id] = true
+                            membres[idUser] = true
+                              db.collection("sections").add({
+                          type: this.typeSectionProps,
+                          membres: membres
+                          })
+                          .then(docRef => {
+                              this.sectionProps = doc.id
+                              console.log("Document written with ID: ", docRef.id);
+                              
+
+                          })
+                          .catch(error => {
+                              console.error("Error adding document: ", error);
+                          });
+
+                          
+
+
+                             }
 
 
 
-
-                      
-
-
-
-
-
-          }
-      }).catch(function(error) {
-          console.log("Error getting document:", error);
-      });
+                })
+                .catch(error => {
+                    console.log("Error getting documents: ", error);
+                });
 
 
+     
 
 
-          }
-      }).catch(function(error) {
-          console.log("Error getting document:", error);
-      });
-  }
-
-
-}
+      }
  
-        
-      
-
+      }   
 },
 
 created () {
@@ -315,11 +354,14 @@ created () {
 },
 
 watch: {
-  typeSectionProps: function() {
+  typeSectionProps: function ()  {
           this.typeSection = this.typeSectionProps;
-          this.afficherSections ()
+          this.afficherSections()
 
-        }
+        },
+  notificationVu: function () {
+       this.afficherSections()
+  }
     
   
     
@@ -368,5 +410,8 @@ computed:
   background-color: #e8d6c9;
   z-index: 1000;
   padding: 20px;
+ }
+ .newCSS {
+  color:orange;
  }
 </style>
