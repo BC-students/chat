@@ -1,17 +1,22 @@
 <!-- zone affichage message + input-->
 <!-- ===================== template ===================== -->
 <template>
-	<div>
+	<div id="chatbox">
 		<div id="tchat">
 			<button @click="ancienMessageAfficher">ancien message</button>
 			<button v-if="listeMessagesLongueur > 30" @click="ancienMessageSupprimer">moins</button>
 			<ul class="listeMessage">
-				<li class="messageCSS" v-for="message in listeMessages">
-					<div v-if="message[1] == user" class="userCSS"><b>moi</b>: <span> {{ message[0] }}</span></div>
-					<div v-else ><b>{{ message[1] }}</b>:<span > {{ message[0] }}</span></div></li>
+				<li id="messageCSS" v-for="message in listeMessages">
+					<div v-if="message[1] == user" class="messageMoi"><b class="userCSS">moi</b><span><div v-html="message[0]" v-linkified /></span></div>
+					<div v-else class="messageAutre"><b class="userCSS">{{ message[1] }}</b><span ><div v-html="message[0]" v-linkified /></span></div></li>
 			</ul>
 		</div>
-		<input class="envoyerCSS" type="text" v-model="messageEnvoyer" @keyup.enter="envois">
+		<div class="envoyerCSS">
+			<img src="../assets/icons/paperclip.png" alt="">
+			<img src="../assets/icons/emote.png" alt="">
+			<input type="text" v-model="messageEnvoyer" @keyup.enter="envois">
+			<img src="../assets/icons/paperplane.png" alt="">
+		</div>
 	</div>
 </template>
 
@@ -21,6 +26,7 @@
 
 import { db } from '../main'
 import firebase from 'firebase'
+
 
 
 
@@ -206,25 +212,100 @@ watch: {
 <!-- ====================== CSS ========================== -->
 
 <style>
-	#tchat {
-		height: 600px;
-		width: 500px;
-		overflow: scroll;
-		margin:auto;
+	#chatBox{
+		width: 100%
 	}
-	.messageCSS {
+
+
+	#tchat {
+		height: 80vh;
+		width: auto;
+		overflow-y: scroll;
+		margin:auto;
+		background-color: #1F303A;
+		background-image: url('../assets/icons/mascotOpacity.png');
+		background-repeat: no-repeat;
+		background-position: center;
+
+	}
+
+
+	#messageCSS {
 		padding:5px;
+		width: 100%;
 		list-style: none;
+		color:white;
 	}
 
 	.userCSS {
-		margin-left: 200px;
+	}
+	.userCSS{
+		color:#1C9EA0;
 	}
 
 	.envoyerCSS {
 	margin: 0 auto;
-	width: 500px;
+	width: 100%;
+	height: 10vh;
+	background-color: #111B24;
+	line-height: 10vh;
+
+
+
 
 }
+
+.envoyerCSS>img{
+	margin-left:3px; 
+}
+.envoyerCSS>input{
+	height: 55px;
+	width: 72%;
+	background-color: #2A3C48;
+	border:none;
+	border-radius: 12px;
+	margin-left:3px;
+	color:white; 
+}
+
+
+.messageMoi{
+	text-align: right;
+	margin: 5px;
+	margin-right: 50px;
+
+}
+.messageAutre{
+	margin:5px;
+	margin-left: 15px;
+}
+
+
+
+
+
+
+/*lien*/
+
+ /* unvisited link */
+a:link {
+    color: #63C3D1;
+
+}
+
+/* visited link */
+a:visited {
+    color: #63C3D1;
+}
+
+/* mouse over link */
+a:hover {
+    color: #63C3D1;
+}
+
+/* selected link */
+a:active {
+    color: #63C3D1;
+} 
 
 </style>

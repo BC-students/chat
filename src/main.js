@@ -8,6 +8,11 @@ import firebase from 'firebase/app'
 import 'firebase/firestore'
 import VueFire from 'vuefire'
 import App from './App'
+import linkify from 'vue-linkify'
+import BootstrapVue from 'bootstrap-vue'
+import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap-vue/dist/bootstrap-vue.css'
+
 
 
 
@@ -46,7 +51,7 @@ Vue.mixin({
   data: function() {
     return {
       get etatConnexion() {
-        return false;
+        return true;
       },
       get userName() {
         return '';
@@ -59,7 +64,8 @@ Vue.mixin({
 
 
 
-
+Vue.directive('linkified', linkify)
+Vue.use(BootstrapVue);
 
 
 /* eslint-disable no-new */

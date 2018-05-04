@@ -2,35 +2,46 @@
 
   <div>
     <!-- //pop up nouvelle section-->
-      <div v-if="showModal == true" id="newSection">
-          <label for="titre">Nom du channel</label>
-          <input v-model="titreSection" name="nomSection" type="text">
-          <button @click="newSection">Créer</button>
-          <button @click="showModal = false">Annuler</button>
-      </div>
+      <b-modal hide-footer v-if="showModal == true" id="newSection" title="Nom du channel">
+          <input class="d-block" v-model="titreSection" name="nomSection" type="text">
+          <b-btn @click="showModal = false" variant="outline-danger">Annuler</b-btn>
+          <b-btn @click="newSection">Créer</b-btn>
+          
+      </b-modal>
     <!-- fin pop up -->
     <!-- //pop up  ajouter un membre-->
-      <div class="popupCSS" v-if="showModal2 == true" id="newMembre">
-          <label for="nom">ajouter un mebre</label>
-          <input v-model="nomMembre" name="nomMembre" type="text">
-          <button v-if="ajouterId != ''" @click="ajouterMembre">Ajouter</button>
-          <button @click="showModal2 = false">Annuler</button>
+      <b-modal hide-footer v-if="showModal2 == true" id="newMembre" title="Ajouter un membre">
+          <img src="../assets/icons/search.png"><input v-model="nomMembre" name="nomMembre" type="text">
+          <b-btn v-if="ajouterId != ''" @click="ajouterMembre">Ajouter</b-btn>
+          <b-btn @click="showModal2 = false">Annuler</b-btn>
           <!-- liste déroulante -->
           <div v-for="membre in filteredMembres">
            <span @click="nomMembre = membre[1]; ajouterId = membre[0]">{{membre[1]}}</span>
           </div>
-      </div>
+      </b-modal>
     <!-- fin pop up -->
-
-    <ul class="listeChatCSS">
-      <li :class="{newCSS:section[2]}" class="listeSectionsCSS" v-for="section in listeSections" @click="sectionProps=section[0]; messagePerso(section[0])">
-        {{section[1]}} <span v-if="section[2]">new</span>  
-        <button v-if="typeSection == 'prive'" @click="showModal2 = true; showModal2Value = section[0]">+</button> 
-        <button v-if="typeSectionProps == 'prive'" @click="supprimerSection(section[0])">X</button>
-      </li>
-      <li v-if="typeSectionProps != 'perso'"><button @click="showModal = true">+</button></li>
-    </ul>
-    <chatBox v-if="sectionProps != ''" class="tchatZone" :sectionActive='sectionProps'  id="centrerCSS"/>
+    <div id="titreSection">{{nomSection}}</div>
+    <b-container id="bodyListeChat" fluid class="w-100">
+      <b-row>
+        <b-col cols="3">
+          <div id="titreTypeSection">{{typeSectionProps}}</div>
+          <div>barre de recherhe - comming soon</div>
+          <ul class="listeChatCSS">
+            <li v-b-modal.newSection id="ajouterSectionCSS" class="listeSectionsCSS" @click="showModal = true" v-if="typeSectionProps != 'perso'"><span style="margin-left:5px;margin-right:5px;">Ajouter une section</span><img src="../assets/icons/add.png" alt=""></li>
+            <li :class="{newCSS2:section[2],selection:sectionProps == section[0]}" class="listeSectionsCSS" v-for="section in listeSections" @click="sectionProps=section[0]; messagePerso(section[0]);nomSection = section[1]" >
+              {{section[1]}} <span v-if="section[2]">new</span>  
+              <button v-b-modal.newMembre v-if="typeSection == 'prive'" @click="showModal2 = true; showModal2Value = section[0]">+</button> 
+              <button v-if="typeSectionProps == 'prive'" @click="supprimerSection(section[0])">X</button>
+            </li>
+          </ul>
+        </b-col>
+        <b-col cols="9" id="zoneTchatCSS">
+          <chatBox v-if="sectionProps != ''" class="tchatZoneCSS" :sectionActive='sectionProps'/>
+          <div id="imgFond" v-if="sectionProps == ''"><img src="../assets/icons/mascot.png" alt=""></div>
+          
+        </b-col>
+      </b-row>
+    </b-container>
   </div>
  
 </template>
@@ -70,7 +81,8 @@ export default {
     typeSection : 'global',
     nomMembre:'',
     membres: ['moi'],
-    ajouterId: ''
+    ajouterId: '',
+    nomSection:''
   }
     
   
@@ -133,9 +145,8 @@ methods: {
            else {
             var infoMsg
             var check = false
-            db.collection('sections').where('type', '==', 'perso').where('membres.'+ doc.id ,'==', true).where('membres.'+ idUser ,'==', true).get().then(querySnapshot => {
-              console.log(querySnapshot);
-              querySnapshot.forEach(doc2 => {
+            db.collection('sections').where('type', '==', 'perso').where('membres.'+ doc.id ,'==', true).where('membres.'+ idUser ,'==', true).get().then(querySnapshot2 => {
+              querySnapshot2.forEach(doc2 => {
                 if(doc2.data().vu[idUser] != true){
                   infoMsg = [doc.id,doc.data().nom, true]
                   check = true
@@ -386,32 +397,110 @@ computed:
 </script>
 
 <style>
- .tchatZone{
-  margin:auto;
- }
- #centrerCSS {
-  margin:auto;
-  margin-top: 10px;
-  width: 500px;
- }
+  #bodyListeChat{
+    height: 90vh;
+    margin:0 auto;
+    padding: 0;
+    background-color: #16222E
+  }
+
+
+ 
 
  .listeSectionsCSS{
-  cursor: pointer
+    cursor: pointer;
+    padding:5px;
+    background-color: #16222E;
+    border-radius:10px;
+    margin-left: -15px;
+ }
+ .listeSectionsCSS:hover{
+    filter: grayscale(70%);
+ }
+ .selection{
+  filter: grayscale(70%);
  }
 
  .listeChatCSS {
-  position: absolute;
-  top: 30px;
+    background-color: #16222E;
+    list-style: none;
+    margin-top: 10px;
+
+ }
+  .listeChatCSS>li{
+    cursor: pointer;
+    padding:5px;
+    background-color: #16222E;
+    border-radius:10px;
+  }
+ .popupCSS {
+    position: absolute;
+    margin:auto;
+    background-color: #e8d6c9;
+    z-index: 1000;
+    padding: 20px;
+ }
+ .newCSS2 {
+    list-style: disc;
+    text-transform: uppercase;
+    color:orange;
+ }
+  #ajouterSectionCSS{
+    background-color: #0D181E;
+    height: 38px;
+    margin-bottom: 15px;
+  }
+
+  #ajouterSectionCSS>img{
+    height: 25px;
+  }
+
+  #titreTypeSection{
+    text-transform: uppercase;
+    text-align: center;
+    padding:10px;
+    margin: 10px;
+    background-color: #0D181E;
+    border-radius: 10px;
+  }
+  #titreSection{
+    position: absolute;
+    margin-top: -9vh;
+    margin-left:17vw;
+    text-align: center;
+    z-index: 2;
+    color:#157676;
+    text-transform: uppercase;
+    font-size: 40px;
+  }
+/*tchat*/
+ .tchatZoneCSS{
+  width: ;idth: 100%;
+ }
+ #zoneTchatCSS{
+  background-color: #1F303A;
+  height: 90vh;
+  width: 100%;
+  margin:0 auto;
+  padding:0}
+#imgFond{
+  height: 100%;
+  width: 100%;
+  text-align: center;
+  line-height: 90vh
+
+  }
+#zoneTchatCSS>div>img{
+  margin:auto;
+
+
+ }
+ 
+
+
+ b-modal{
+  overflow: hidden;
  }
 
- .popupCSS {
-  position: absolute;
-  margin:auto;
-  background-color: #e8d6c9;
-  z-index: 1000;
-  padding: 20px;
- }
- .newCSS {
-  color:orange;
- }
+
 </style>
